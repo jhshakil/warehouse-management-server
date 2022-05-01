@@ -13,5 +13,5 @@ app.get('', (req, res) => {
 })
 
 app.listen(port, () => {
-    console.log('Port is', port);
+    console.log('Port number is', port);
 })
