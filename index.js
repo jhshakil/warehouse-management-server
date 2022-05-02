@@ -26,7 +26,13 @@ async function run() {
             res.send(inventory);
         })
 
-
+        app.get('/item/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log(id)
+            const query = { _id: ObjectId(id) };
+            const item = await inventoryItems.findOne(query);
+            res.send(item);
+        })
     }
     finally {
 
