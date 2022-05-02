@@ -19,7 +19,7 @@ async function run() {
         await client.connect();
         const inventoryItems = client.db('carDealer').collection('inventory');
 
-        app.get('/inventorys', async (req, res) => {
+        app.get('/inventory', async (req, res) => {
             const query = {};
             const cursor = inventoryItems.find(query);
             const inventory = await cursor.toArray();
@@ -45,6 +45,12 @@ async function run() {
                 }
             };
             const result = await inventoryItems.updateOne(filter, updateDoc, options);
+            res.send(result);
+        })
+
+        app.post('/inventory', async (req, res) => {
+            const newInventory = req.body;
+            const result = await inventoryItems.insertOne(newInventory);
             res.send(result);
         })
     }
