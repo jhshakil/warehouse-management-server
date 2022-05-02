@@ -19,19 +19,33 @@ async function run() {
         await client.connect();
         const inventoryItems = client.db('carDealer').collection('inventory');
 
-        app.get('/inventory', async (req, res) => {
+        app.get('/inventorys', async (req, res) => {
             const query = {};
             const cursor = inventoryItems.find(query);
             const inventory = await cursor.toArray();
             res.send(inventory);
         })
 
-        app.get('/item/:id', async (req, res) => {
+        app.get('/inventory/:id', async (req, res) => {
             const id = req.params.id;
-            console.log(id)
             const query = { _id: ObjectId(id) };
-            const item = await inventoryItems.findOne(query);
-            res.send(item);
+            const inventory = await inventoryItems.findOne(query);
+            res.send(inventory);
+        })
+
+        // update quantity 
+        app.put('/inventory/:id', async (req, res) => {
+            const id = req.params.id;
+            const updateQuantity = req.body;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    quantity: updateQuantity.quantity
+                }
+            };
+            const result = await inventoryItems.updateOne(filter, updateDoc, options);
+            res.send(result);
         })
     }
     finally {
