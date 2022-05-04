@@ -61,6 +61,15 @@ async function run() {
             const result = await inventoryItems.deleteOne(query);
             res.send(result);
         })
+
+        // My items 
+        app.get('/myitems', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const cursor = inventoryItems.find(query);
+            const myitems = await cursor.toArray();
+            res.send(myitems);
+        })
     }
     finally {
 
