@@ -33,71 +33,77 @@ async function run() {
     try {
         client.connect();
         // await client.connect();
-        const inventoryItems = client.db('carDealer').collection('inventory');
+        // console.log(client.connect())
+        if (client.connect()) {
+            const inventoryItems = client.db('carDealer').collection('inventory');
 
-        app.post('/login', async (req, res) => {
-            const user = req.body;
-            const accessToken = jwt.sign(user, process.env.SECURE_TOKEN, { expiresIn: '20d' });
-            res.send({ accessToken });
-        })
+            app.post('/login', async (req, res) => {
+                const user = req.body;
+                const accessToken = jwt.sign(user, process.env.SECURE_TOKEN, { expiresIn: '20d' });
+                res.send({ accessToken });
+            })
 
-        app.get('/inventory', async (req, res) => {
-            const query = {};
-            const cursor = inventoryItems.find(query);
-            const inventory = await cursor.toArray();
-            res.send(inventory);
-        })
-
-        app.get('/inventory/:id', async (req, res) => {
-            const id = req.params.id;
-            const query = { _id: ObjectId(id) };
-            const inventory = await inventoryItems.findOne(query);
-            res.send(inventory);
-        })
-
-        // update quantity 
-        app.put('/inventory/:id', async (req, res) => {
-            const id = req.params.id;
-            const updateData = req.body;
-            const filter = { _id: ObjectId(id) };
-            const options = { upsert: true };
-            const updateDoc = {
-                $set: {
-                    quantity: updateData.quantity,
-                    stock: updateData.stock
-                }
-            };
-            const result = await inventoryItems.updateOne(filter, updateDoc, options);
-            res.send(result);
-        })
-
-        app.post('/inventory', async (req, res) => {
-            const newInventory = req.body;
-            const result = await inventoryItems.insertOne(newInventory);
-            res.send(result);
-        })
-
-        // Delete item 
-        app.delete('/inventory/:id', async (req, res) => {
-            const id = req.params.id;
-            const query = { _id: ObjectId(id) };
-            const result = await inventoryItems.deleteOne(query);
-            res.send(result);
-        })
-
-        // My items 
-        app.get('/myitems', verifyToken, async (req, res) => {
-            const decodedEmail = req.decoded.email;
-            const email = req.query.email;
-            if (email === decodedEmail) {
-                const query = { email: email };
+            app.get('/inventory', async (req, res) => {
+                const query = {};
                 const cursor = inventoryItems.find(query);
-                const myitems = await cursor.toArray();
-                res.send(myitems);
-            } else {
-                return res.status(403).send({ massage: 'Forbiddens access' })
-            }
-        })
+                const inventory = await cursor.toArray();
+                res.send(inventory);
+            })
+
+            app.get('/inventory/:id', async (req, res) => {
+                const id = req.params.id;
+                const query = { _id: ObjectId(id) };
+                const inventory = await inventoryItems.findOne(query);
+                res.send(inventory);
+            })
+
+            // update quantity 
+            app.put('/inventory/:id', async (req, res) => {
+                const id = req.params.id;
+                const updateData = req.body;
+                const filter = { _id: ObjectId(id) };
+                const options = { upsert: true };
+                const updateDoc = {
+                    $set: {
+                        quantity: updateData.quantity,
+                        stock: updateData.stock
+                    }
+                };
+                const result = await inventoryItems.updateOne(filter, updateDoc, options);
+                res.send(result);
+            })
+
+            app.post('/inventory', async (req, res) => {
+                const newInventory = req.body;
+                const result = await inventoryItems.insertOne(newInventory);
+                res.send(result);
+            })
+
+            // Delete item 
+            app.delete('/inventory/:id', async (req, res) => {
+                const id = req.params.id;
+                const query = { _id: ObjectId(id) };
+                const result = await inventoryItems.deleteOne(query);
+                res.send(result);
+            })
+
+            // My items 
+            app.get('/myitems', verifyToken, async (req, res) => {
+                const decodedEmail = req.decoded.email;
+                const email = req.query.email;
+                if (email === decodedEmail) {
+                    const query = { email: email };
+                    const cursor = inventoryItems.find(query);
+                    const myitems = await cursor.toArray();
+                    res.send(myitems);
+                } else {
+                    return res.status(403).send({ massage: 'Forbiddens access' })
+                }
+            })
+        } else {
+            run().catch(console.dir)
+        }
+
     }
     finally {
 
